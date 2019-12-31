@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <canvas id="canvas" width="300" height="470"></canvas>
+  <button onclick="action()" id="btn">开始</button>
+  <img src="./12.jpeg" alt="" id="image1" style="display:none" />
+  <img src="./11.jpeg" alt="" id="image2" style="display:none" />
+</body>
+
+</html>
+<script>
+  var cas = document.getElementById("canvas"),
+    ctx = cas.getContext("2d"),
+    btn = document.getElementById("btn"),
+    images = [document.getElementById('image1'), document.getElementById('image2')],
+    bgImage = 1,
+    fgImage = 0,
+
+    settings = {
+      colSize: 2,
+      maxDev: 100,
+      maxDiff: 50,
+      fallSpeed: 6,
+      columns: 200,
+      height: 600,
+    },
+
+
+    y = [],
+    done = true,
+    yPos = 0,
+    status = '开始';
+
+  function init() {
+    ctx.drawImage(images[fgImage], 0, 0);
+
+    for (var x = 0; x < settings.columns; x++) {
+      if (x === 0) {
+        y[x] = -Math.floor(Math.random() * settings.maxDev);
+      } else {
+        y[x] = y[x - 1] + (Math.floor(Math.random() * settings.maxDiff) - settings.maxDiff / 2);
+      }
+
+      if (y[x] > 0) {
+        y[x] = 0;
+      } else if (y[x] < -settings.maxDev) {
+        y[x] = -settings.maxDev;
+      }
+    }
+  }
+
+  function down() {
+    ctx.drawImage(images[bgImage], 0, 0);
+
+    for (var col = 0; col < settings.columns; col++) {
+      y[col] += settings.fallSpeed;
+
+      if (y[col] < 0) {
+        done = false;
+        yPos = 0;
+      } else if (y[col] < settings.height) {
+        done = false;
+        yPos = y[col];
+      } else {
+        done = true;
+      }
+
+      ctx.drawImage(images[fgImage], col * settings.colSize, 0, settings.colSize, settings.height, col * settings.colSize, yPos, settings.colSize, settings.height);
+    }
+    if (!done) {
+      requestAnimationFrame(down);
+    }
+  }
+
+  function action() {
+    if (status === '开始') {
+      status = '重置';
+      btn.innerText = status;
+      down();
+    } else {
+      status = '开始';
+      btn.innerText = status;
+      init();
+    }
+  }
+
+  window.onload = function () {
+    init();
+  }
+
+</script>
